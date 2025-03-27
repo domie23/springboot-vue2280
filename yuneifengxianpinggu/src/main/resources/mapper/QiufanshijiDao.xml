@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.QiufanshijiDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.qiufan_id as qiufanId
+        ,a.qiufanshiji_uuid_number as qiufanshijiUuidNumber
+        ,a.qiufanshiji_name as qiufanshijiName
+        ,a.qiufanshiji_types as qiufanshijiTypes
+        ,a.fasheng_time as fashengTime
+        ,a.qiufanshiji_address as qiufanshijiAddress
+        ,a.qiufanshiji_file as qiufanshijiFile
+        ,a.qiufanshiji_content as qiufanshijiContent
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.QiufanshijiView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,qiufan.qiufan_uuid_number as qiufanUuidNumber
+        ,qiufan.qiufan_name as qiufanName
+        ,qiufan.qiufan_id_number as qiufanIdNumber
+        ,qiufan.qiufan_photo as qiufanPhoto
+        ,qiufan.age as age
+        ,qiufan.sex_types as sexTypes
+        ,qiufan.ruyu_time as ruyuTime
+        ,qiufan.qiufan_nianxian as qiufanNianxian
+        ,qiufan.qiufan_content as qiufanContent
+        ,qiufan.fanzuishiyou_content as fanzuishiyouContent
+
+        FROM qiufanshiji  a
+        left JOIN qiufan qiufan ON a.qiufan_id = qiufan.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.qiufanId != null and params.qiufanId != ''">
+                and (
+                    a.qiufan_id = #{params.qiufanId}
+                )
+            </if>
+            <if test=" params.qiufanshijiUuidNumber != '' and params.qiufanshijiUuidNumber != null and params.qiufanshijiUuidNumber != 'null' ">
+                and a.qiufanshiji_uuid_number like CONCAT('%',#{params.qiufanshijiUuidNumber},'%')
+            </if>
+            <if test=" params.qiufanshijiName != '' and params.qiufanshijiName != null and params.qiufanshijiName != 'null' ">
+                and a.qiufanshiji_name like CONCAT('%',#{params.qiufanshijiName},'%')
+            </if>
+            <if test="params.qiufanshijiTypes != null and params.qiufanshijiTypes != ''">
+                and a.qiufanshiji_types = #{params.qiufanshijiTypes}
+            </if>
+            <if test=" params.fashengTimeStart != '' and params.fashengTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.fasheng_time) >= UNIX_TIMESTAMP(#{params.fashengTimeStart}) ]]>
+            </if>
+            <if test=" params.fashengTimeEnd != '' and params.fashengTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.fasheng_time) <= UNIX_TIMESTAMP(#{params.fashengTimeEnd}) ]]>
+            </if>
+            <if test=" params.qiufanshijiAddress != '' and params.qiufanshijiAddress != null and params.qiufanshijiAddress != 'null' ">
+                and a.qiufanshiji_address like CONCAT('%',#{params.qiufanshijiAddress},'%')
+            </if>
+            <if test=" params.qiufanshijiContent != '' and params.qiufanshijiContent != null and params.qiufanshijiContent != 'null' ">
+                and a.qiufanshiji_content like CONCAT('%',#{params.qiufanshijiContent},'%')
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断囚犯的id不为空 -->
+            <if test=" params.qiufanIdNotNull != '' and params.qiufanIdNotNull != null and params.qiufanIdNotNull != 'null' ">
+                and a.qiufan_id IS NOT NULL
+            </if>
+            <if test=" params.qiufanUuidNumber != '' and params.qiufanUuidNumber != null and params.qiufanUuidNumber != 'null' ">
+                and qiufan.qiufan_uuid_number like CONCAT('%',#{params.qiufanUuidNumber},'%')
+            </if>
+            <if test=" params.qiufanName != '' and params.qiufanName != null and params.qiufanName != 'null' ">
+                and qiufan.qiufan_name like CONCAT('%',#{params.qiufanName},'%')
+            </if>
+            <if test=" params.qiufanIdNumber != '' and params.qiufanIdNumber != null and params.qiufanIdNumber != 'null' ">
+                and qiufan.qiufan_id_number like CONCAT('%',#{params.qiufanIdNumber},'%')
+            </if>
+            <if test="params.ageStart != null  and params.ageStart != '' ">
+                <![CDATA[  and qiufan.age >= #{params.ageStart}   ]]>
+            </if>
+            <if test="params.ageEnd != null  and params.ageEnd != '' ">
+                <![CDATA[  and qiufan.age <= #{params.ageEnd}   ]]>
+            </if>
+            <if test="params.age != null  and params.age != '' ">
+                and qiufan.age = #{params.age}
+            </if>
+            <if test="params.sexTypes != null  and params.sexTypes != ''">
+                and qiufan.sex_types = #{params.sexTypes}
+            </if>
+
+            <if test=" params.ruyuTimeStart != '' and params.ruyuTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(qiufan.ruyu_time) >= UNIX_TIMESTAMP(#{params.ruyuTimeStart}) ]]>
+            </if>
+            <if test=" params.ruyuTimeEnd != '' and params.ruyuTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(qiufan.ruyu_time) <= UNIX_TIMESTAMP(#{params.ruyuTimeEnd}) ]]>
+            </if>
+            <if test=" params.qiufanNianxian != '' and params.qiufanNianxian != null and params.qiufanNianxian != 'null' ">
+                and qiufan.qiufan_nianxian like CONCAT('%',#{params.qiufanNianxian},'%')
+            </if>
+            <if test=" params.qiufanContent != '' and params.qiufanContent != null and params.qiufanContent != 'null' ">
+                and qiufan.qiufan_content like CONCAT('%',#{params.qiufanContent},'%')
+            </if>
+            <if test=" params.fanzuishiyouContent != '' and params.fanzuishiyouContent != null and params.fanzuishiyouContent != 'null' ">
+                and qiufan.fanzuishiyou_content like CONCAT('%',#{params.fanzuishiyouContent},'%')
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(qiufan.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(qiufan.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>
